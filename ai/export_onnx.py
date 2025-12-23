@@ -43,21 +43,16 @@ def export_to_onnx(board_size: int = 9, output_path: str = "docs/model.onnx", mo
     # 출력 디렉토리 생성
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
-    # ONNX로 내보내기
+    # ONNX로 내보내기 (웹 호환성을 위해 Opset 10 사용 및 차원 고정)
     torch.onnx.export(
         model,
         dummy_input,
         output_path,
         export_params=True,
-        opset_version=12,
+        opset_version=10,  # 웹 호환성을 위해 10으로 낮춤
         do_constant_folding=True,
         input_names=['input'],
-        output_names=['policy', 'value'],
-        dynamic_axes={
-            'input': {0: 'batch_size'},
-            'policy': {0: 'batch_size'},
-            'value': {0: 'batch_size'}
-        }
+        output_names=['policy', 'value']
     )
     
     print(f"ONNX 모델 저장 완료: {output_path}")
