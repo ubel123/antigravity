@@ -31,10 +31,10 @@ class GomokuGame {
         try {
             statusEl.textContent = '모델 로딩 중 (WASM)...';
 
-            // ONNX Runtime Web WASM 파일 경로 설정 (1.14.0) - 안정적인 구버전
-            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/";
-            ort.env.wasm.numThreads = 1; // 안정성을 위해 단일 스레드 강제
-            ort.env.wasm.simd = false;   // 호환성을 위해 SIMD 비활성화 (필요시)
+            // ONNX Runtime Web WASM 파일 경로 설정 (로컬)
+            ort.env.wasm.wasmPaths = "./";
+            ort.env.wasm.numThreads = 1;
+            ort.env.wasm.simd = false;
 
             const options = {
                 executionProviders: ['wasm'],
