@@ -31,27 +31,20 @@ class GomokuGame {
         try {
             statusEl.textContent = '모델 로딩 중 (WASM)...';
 
-            // ONNX Runtime Web WASM 파일 경로 설정 (CDN)
+            // ONNX Runtime Web WASM 파일 경로 설정 (1.14.0)
             // GitHub Pages와 같은 정적 호스팅에서는 .wasm 파일을 찾지 못하는 경우가 많으므로 CDN을 명시적으로 사용
-            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.0/dist/";
-            ort.env.wasm.numThreads = 1;
+            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/";
 
             const options = {
                 executionProviders: ['wasm'],
-                graphOptimizationLevel: 'all'
             };
 
-            // 1. 모델 파일 직접 로드 시도
-            try {
-                this.session = await ort.InferenceSession.create('./model.onnx', options);
-            } catch (e) {
-                console.warn('직접 로드 실패, Fetch 시도:', e);
-                // 2. 실패 시 Fetch API로 데이터를 받아와서 로드 (GitHub Pages 호환성 향상)
-                const response = await fetch('./model.onnx');
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const buffer = await response.arrayBuffer();
-                this.session = await ort.InferenceSession.create(buffer, options);
-            }
+            // Fetch API로 데이터를 받아와서 로드 (가장 확실한 방법)
+            const response = await fetch('./model.onnx');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const buffer = await response.arrayBuffer();
+            this.session = await ort.InferenceSession.create(buffer, options);
 
             statusEl.textContent = '✓ 모델 로드 완료!';
             statusEl.classList.add('loaded');
