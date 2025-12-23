@@ -31,9 +31,9 @@ class GomokuGame {
         try {
             statusEl.textContent = '모델 로딩 중 (WASM)...';
 
-            // ONNX Runtime Web WASM 파일 경로 설정 (1.14.0)
+            // ONNX Runtime Web WASM 파일 경로 설정 (1.18.0)
             // GitHub Pages와 같은 정적 호스팅에서는 .wasm 파일을 찾지 못하는 경우가 많으므로 CDN을 명시적으로 사용
-            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/";
+            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/";
 
             const options = {
                 executionProviders: ['wasm'],
