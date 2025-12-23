@@ -29,20 +29,27 @@ class GomokuGame {
     async loadModel() {
         const statusEl = document.getElementById('model-status');
         try {
-            statusEl.textContent = '모델 로딩 중 (WASM)...';
+            statusEl.textContent = 'WASM 바이너리 다운로드 중...';
 
-            // ONNX Runtime Web WASM 파일 경로 설정 (로컬)
-            ort.env.wasm.wasmPaths = "./";
+            // 1. WASM 파일 수동 다운로드 (경로 문제 원천 차단)
+            const wasmResponse = await fetch('./ort-wasm.wasm');
+            if (!wasmResponse.ok) throw new Error(`WASM Load Failed: ${wasmResponse.status}`);
+            const wasmBuffer = await wasmResponse.arrayBuffer();
+
+            // 2. ONNX Runtime에 WASM 바이너리 직접 주입
+            ort.env.wasm.wasmBinary = wasmBuffer;
             ort.env.wasm.numThreads = 1;
             ort.env.wasm.simd = false;
+
+            statusEl.textContent = '모델 로딩 중...';
 
             const options = {
                 executionProviders: ['wasm'],
             };
 
-            // Fetch API로 데이터를 받아와서 로드 (가장 확실한 방법)
+            // 3. 모델 로드
             const response = await fetch('./model.onnx');
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) throw new Error(`Model Load Failed: ${response.status}`);
 
             const buffer = await response.arrayBuffer();
             this.session = await ort.InferenceSession.create(buffer, options);
