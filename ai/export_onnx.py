@@ -21,35 +21,39 @@ def export_to_onnx(board_size: int = 9, output_path: str = "docs/model.onnx", mo
         output_path: ONNX 파일 저장 경로
         model_path: 학습된 모델 경로 (없으면 랜덤 초기화)
     """
-    # 모델 생성
+    # 모델 로드 (CPU 강제)
+    device = torch.device('cpu')
     model = PolicyValueNetwork(
         board_size=board_size,
         num_channels=64,
         num_res_blocks=4
-    )
-    
-    # 학습된 모델 로드
+    ).to(device)
     if model_path and os.path.exists(model_path):
         print(f"학습된 모델 로드: {model_path}")
-        model.load_state_dict(torch.load(model_path, map_location='cpu'))
+        try:
+            state_dict = torch.load(model_path, map_location=device)
+            model.load_state_dict(state_dict)
+        except Exception as e:
+            print(f"모델 로드 주의: {e}")
+            print("기본 초기화 모델을 사용합니다.")
     else:
-        print("랜덤 초기화된 모델 사용")
-    
+        print("경고: 학습된 모델을 찾을 수 없습니다. 랜덤 가중치를 사용합니다.")
+
     model.eval()
     
-    # 더미 입력 생성
-    dummy_input = torch.randn(1, 3, board_size, board_size)
+    # 더미 입력 생성 (Batch size 1, CPU)
+    dummy_input = torch.randn(1, 3, board_size, board_size, device=device)
     
     # 출력 디렉토리 생성
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
-    # ONNX로 내보내기 (웹 호환성을 위해 Opset 10 사용 및 차원 고정)
+    # ONNX로 내보내기 (Opset 11 사용)
     torch.onnx.export(
         model,
         dummy_input,
         output_path,
         export_params=True,
-        opset_version=10,  # 웹 호환성을 위해 10으로 낮춤
+        opset_version=11,  # 웹 호환성 표준인 11 사용
         do_constant_folding=True,
         input_names=['input'],
         output_names=['policy', 'value']
