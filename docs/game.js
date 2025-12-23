@@ -29,25 +29,19 @@ class GomokuGame {
     async loadModel() {
         const statusEl = document.getElementById('model-status');
         try {
-            statusEl.textContent = 'WASM 바이너리 다운로드 중...';
-
-            // 1. WASM 파일 수동 다운로드 (경로 문제 원천 차단)
-            const wasmResponse = await fetch('./ort-wasm.wasm');
-            if (!wasmResponse.ok) throw new Error(`WASM Load Failed: ${wasmResponse.status}`);
-            const wasmBuffer = await wasmResponse.arrayBuffer();
-
-            // 2. ONNX Runtime에 WASM 바이너리 직접 주입
-            ort.env.wasm.wasmBinary = wasmBuffer;
-            ort.env.wasm.numThreads = 1;
-            ort.env.wasm.simd = false;
-
             statusEl.textContent = '모델 로딩 중...';
+
+            // ONNX Runtime Web WASM 파일 경로 설정 (CDN 1.17.0)
+            ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.0/dist/";
+            ort.env.wasm.numThreads = 1;
 
             const options = {
                 executionProviders: ['wasm'],
+                graphOptimizationLevel: 'all'
             };
 
-            // 3. 모델 로드
+            // 모델 로드 (단일 .onnx 파일)
+            // fetch 후 ArrayBuffer로 넘기는 것이 GitHub Pages에서 가장 안정적임
             const response = await fetch('./model.onnx');
             if (!response.ok) throw new Error(`Model Load Failed: ${response.status}`);
 

@@ -47,26 +47,39 @@ def export_to_onnx(board_size: int = 9, output_path: str = "docs/model.onnx", mo
     # 출력 디렉토리 생성
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
-    # ONNX로 내보내기 (Opset 11 사용)
+    # ONNX로 내보내기 (BytesIO를 사용하여 단일 파일 강제)
+    import io
+    buffer = io.BytesIO()
     torch.onnx.export(
         model,
         dummy_input,
-        output_path,
+        buffer,
         export_params=True,
-        opset_version=11,  # 웹 호환성 표준인 11 사용
+        opset_version=12,
         do_constant_folding=True,
         input_names=['input'],
         output_names=['policy', 'value']
     )
     
-    print(f"ONNX 모델 저장 완료: {output_path}")
-    print(f"보드 크기: {board_size}x{board_size}")
-    print(f"입력 형태: (batch, 3, {board_size}, {board_size})")
-    print(f"출력: policy ({board_size*board_size}), value (1)")
+    # 버퍼 내용을 파일로 저장
+    with open(output_path, "wb") as f:
+        f.write(buffer.getvalue())
     
-    # 파일 크기 확인
-    file_size = os.path.getsize(output_path)
-    print(f"파일 크기: {file_size / 1024:.1f} KB")
+    print(f"ONNX 모델 저장 완료: {output_path}")
+    
+    # 파일 크기 및 파생 파일 확인
+    if os.path.exists(output_path):
+        file_size = os.path.getsize(output_path)
+        print(f"메인 모델 파일 크기: {file_size / 1024:.1f} KB")
+        
+    data_file = output_path + ".data"
+    if os.path.exists(data_file):
+        print(f"주의: 파생 파일이 남아있을 수 있습니다: {data_file}")
+        try:
+            os.remove(data_file)
+            print("외부 데이터 파일 삭제 완료 (단일 파일 사용)")
+        except:
+            pass
     
     return output_path
 
