@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI vs AI 오목 게임 - AlphaZero ONNX 브라우저 버전">
+    <title>AlphaZero Gomoku - AI Battle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">⚫⚪</span>
+                <h1>AlphaZero Gomoku</h1>
+            </div>
+            <div class="header-subtitle">AI vs AI 오목 대결 (ONNX Runtime Web)</div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Game Section -->
+            <section class="game-section">
+                <div class="board-container">
+                    <canvas id="game-board" width="500" height="500"></canvas>
+                    <div class="board-overlay" id="board-overlay">
+                        <div class="overlay-content">
+                            <span class="winner-text" id="winner-text">게임 종료</span>
+                            <button class="btn btn-restart" id="btn-restart">다시 시작</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Info -->
+                <div class="game-info">
+                    <div class="info-card" id="player1-card">
+                        <div class="player-indicator">
+                            <span class="stone black-stone"></span>
+                            <span>흑 (Player 1)</span>
+                        </div>
+                        <div id="player1-status" class="player-status">대기중</div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="info-card" id="player2-card">
+                        <div class="player-indicator">
+                            <span class="stone white-stone"></span>
+                            <span>백 (Player 2)</span>
+                        </div>
+                        <div id="player2-status" class="player-status">대기중</div>
+                    </div>
+                </div>
+
+                <!-- Move Counter -->
+                <div class="move-counter">
+                    <span>착수: </span>
+                    <span id="move-count">0</span>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <aside class="control-panel">
+                <div class="panel-section">
+                    <h2>🎮 게임 컨트롤</h2>
+                    <div class="control-group">
+                        <label for="simulations">MCTS 시뮬레이션</label>
+                        <select id="simulations">
+                            <option value="10">10 (빠름)</option>
+                            <option value="30" selected>30 (기본)</option>
+                            <option value="50">50 (강함)</option>
+                            <option value="100">100 (매우 강함)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="delay">착수 딜레이</label>
+                        <select id="delay">
+                            <option value="100">0.1초</option>
+                            <option value="300" selected>0.3초</option>
+                            <option value="500">0.5초</option>
+                            <option value="1000">1초</option>
+                        </select>
+                    </div>
+                    <button id="btn-start-battle" class="btn btn-primary">
+                        <span class="btn-icon">🤖</span>
+                        AI 대결 시작
+                    </button>
+                    <button id="btn-stop" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">⏹️</span>
+                        중지
+                    </button>
+                </div>
+
+                <div class="panel-section">
+                    <h2>ℹ️ 정보</h2>
+                    <div class="info-text">
+                        <p>🧠 <strong>ONNX Runtime Web</strong>으로 브라우저에서 직접 AI 실행</p>
+                        <p>🎯 <strong>9x9 보드</strong> (모바일 호환)</p>
+                        <p>⚡ <strong>MCTS + 신경망</strong> 기반 AI</p>
+                    </div>
+                    <div id="model-status" class="model-status">
+                        모델 로딩 중...
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2>📊 게임 로그</h2>
+                    <div class="log-container" id="game-log">
+                        <div class="log-entry">게임 시작을 기다리는 중...</div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by <a href="https://onnxruntime.ai/" target="_blank">ONNX Runtime Web</a> • AlphaZero Algorithm
+            </p>
+        </footer>
+    </div>
+
+    <!-- ONNX Runtime Web -->
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.0/dist/ort.min.js"></script>
+    <script src="gomoku.js"></script>
+    <script src="mcts.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>
